@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <a href="index.html" style="text-decoration: none; font-weight: bold; font-size: 1.1rem; color: #333;">🏠 Home</a>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Map Control</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="location styles.css" />
+</head>
+<body>
+  <div class="map-container">
+    <h1>Interactive Location Map</h1>
+
+    <button onclick="enableAdmin()">Login as Admin</button>
+
+    <div class="location-input" id="admin-controls" style="display: none;">
+      <input type="text" id="location" placeholder="Enter location name..." />
+      <button onclick="searchLocation()">Add Marker</button>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([35.6892, 51.3890], 5);
+    let isAdmin = false;
+    let markers = []; // stored marker data for saving
+    let markerList = []; // actual Leaflet marker objects
+
+    // Load map tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Load saved markers from localStorage
+    window.onload = function () {
+      const saved = localStorage.getItem("savedMarkers");
+      if (saved) {
+        markers = JSON.parse(saved);
+        markers.forEach(m => {
+          addMarkerToMap(m.name, m.lat, m.lon);
+        });
+      }
+    };
+
+    function enableAdmin() {
+      const password = prompt("Enter admin password:");
+      if (password === "admin123") {
+        isAdmin = true;
+        document.getElementById('admin-controls').style.display = 'block';
+        alert("Access granted. You can now add and remove markers.");
+
+        // Enable delete for all existing markers
+        markerList.forEach(marker => {
+          marker.on('click', function () {
+            if (confirm("Remove this marker?")) {
+              const { name, lat, lon } = marker._markerData;
+              map.removeLayer(marker);
+              markers = markers.filter(m => !(m.lat == lat && m.lon == lon && m.name == name));
+              localStorage.setItem("savedMarkers", JSON.stringify(markers));
+            }
+          });
+        });
+      } else {
+        alert("Access denied.");
+      }
+    }
+
+    function searchLocation() {
+      if (!isAdmin) return alert("Only admin can add markers.");
+
+      const query = document.getElementById('location').value.trim();
+      if (!query) return alert("Please enter a location.");
+
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length > 0) {
+            const place = data[0];
+            const lat = parseFloat(place.lat);
+            const lon = parseFloat(place.lon);
+
+            addMarkerToMap(query, lat, lon);
+            markers.push({ name: query, lat, lon });
+            localStorage.setItem("savedMarkers", JSON.stringify(markers));
+            map.setView([lat, lon], 10);
+          } else {
+            alert("Location not found.");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Something went wrong.");
+        });
+    }
+
+    function addMarkerToMap(name, lat, lon) {
+      const marker = L.marker([lat, lon]).addTo(map)
+        .bindPopup(`<b>${name}</b>`)
+        .openPopup();
+
+      marker._markerData = { name, lat, lon };
+      markerList.push(marker);
+
+      // If already admin, make the marker removable now
+      if (isAdmin) {
+        marker.on('click', function () {
+          if (confirm("Remove this marker?")) {
+            map.removeLayer(marker);
+            markers = markers.filter(m => !(m.lat == lat && m.lon == lon && m.name == name));
+            localStorage.setItem("savedMarkers", JSON.stringify(markers));
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>

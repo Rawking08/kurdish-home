@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register and Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .form-container {
+      max-width: 400px;
+      margin: auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .alert {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .toggle-link {
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Register or Login</h1>
+
+  <!-- Register Form -->
+  <div id="registerForm" class="form-container">
+    <h2>Register</h2>
+    <p class="alert" id="registerAlert"></p>
+    <input type="text" id="registerName" placeholder="Name" />
+    <input type="email" id="registerEmail" placeholder="Email" />
+    <input type="password" id="registerPassword" placeholder="Password" />
+    <input type="text" id="freeCode" placeholder="Enter Free Access Code (Optional)" />
+    <p>Entry Fee: <strong>£4.99 (Non-negotiable)</strong></p>
+    <button onclick="showPaymentForm()">Proceed to Payment</button>
+    <p class="toggle-link">Already have an account? <a href="javascript:void(0);" onclick="showLoginForm()">Login</a></p>
+  </div>
+
+  <!-- Payment Form (Hidden initially) -->
+  <div id="paymentForm" class="form-container hidden">
+    <h2>Payment</h2>
+    <p class="alert" id="paymentAlert"></p>
+    <input type="text" id="cardNumber" placeholder="Card Number" />
+    <input type="text" id="cardExpiry" placeholder="Expiry Date (MM/YY)" />
+    <input type="text" id="cardCVV" placeholder="CVV" />
+    <button onclick="processPayment()">Pay £4.99</button>
+    <button onclick="cancelPayment()">Cancel</button>
+  </div>
+
+  <!-- Login Form -->
+  <div id="loginForm" class="form-container hidden">
+    <h2>Login</h2>
+    <p class="alert" id="loginAlert"></p>
+    <input type="email" id="loginEmail" placeholder="Email" />
+    <input type="password" id="loginPassword" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p class="toggle-link">Don't have an account? <a href="javascript:void(0);" onclick="showRegisterForm()">Register</a></p>
+  </div>
+
+  <script>
+    // Get users from localStorage (if any)
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('users')) || [];
+    }
+
+    // Save users to localStorage
+    function saveUsers(users) {
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    // Show the register form
+    function showRegisterForm() {
+      document.getElementById('registerForm').style.display = "block";
+      document.getElementById('loginForm').style.display = "none";
+    }
+
+    // Show the login form
+    function showLoginForm() {
+      document.getElementById('registerForm').style.display = "none";
+      document.getElementById('loginForm').style.display = "block";
+    }
+
+    // Show the payment form (if not using free code)
+    function showPaymentForm() {
+      const freeCode = document.getElementById('freeCode').value;
+      const name = document.getElementById('registerName').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+
+      if (freeCode === "FREE2025") {
+        // If the free code is entered, no payment needed, register user for free
+        const users = getUsers();
+        users.push({ name, email, password, entryFee: 0 });
+        saveUsers(users);
+        alert("Registration successful! You can now log in.");
+        showLoginForm();
+        return;
+      }
+
+      // Show the payment form if no free code is entered
+      document.getElementById('registerForm').style.display = "none";
+      document.getElementById('paymentForm').style.display = "block";
+    }
+
+    // Cancel payment form and go back to register
+    function cancelPayment() {
+      document.getElementById('paymentForm').style.display = "none";
+      document.getElementById('registerForm').style.display = "block";
+    }
+
+    // Process payment (for simulation only)
+    function processPayment() {
+      const cardNumber = document.getElementById('cardNumber').value;
+      const cardExpiry = document.getElementById('cardExpiry').value;
+      const cardCVV = document.getElementById('cardCVV').value;
+
+      if (!cardNumber || !cardExpiry || !cardCVV) {
+        document.getElementById('paymentAlert').innerText = "Please fill out all card details.";
+        return;
+      }
+
+      // Simulate payment success
+      alert("Payment successful! You can now log in.");
+
+      const name = document.getElementById('registerName').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+
+      const users = getUsers();
+      users.push({ name, email, password, entryFee: 4.99 });
+      saveUsers(users);
+
+      document.getElementById('paymentForm').style.display = "none";
+      showLoginForm();
+    }
+
+    // Login function with redirection to home page
+    function login() {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const users = getUsers();
+      const user = users.find(user => user.email === email && user.password === password);
+
+      if (user) {
+        alert("Login successful! Welcome back.");
+        localStorage.setItem('loggedIn', 'true'); // ✅ Added line
+        window.location.href = "index.html"; // Redirect to home page
+      } else {
+        document.getElementById('loginAlert').innerText = "Invalid email or password.";
+      }
+    }
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+body{
+    padding: 0px;
+    margin: 0px;
+}
+
+header{
+    background-color: black;
+    background-image: url("images/kurdish\ home\ \(2\).png");
+    background-size: 100%;
+    background-position: center;
+    color: hsl(0, 0%, 100%);
+    padding: 40px;
+    height: 250px;
+    text-align: center;
+}
+header .a{
+    color: white;
+    text-decoration: none;
+    text-transform: uppercase;
+    margin-top: 40px;
+}
+
+header .logo a{
+    background-image: url("images/Kurdish\ Home.png");
+    background-size: 100px;
+    position: relative;
+    top: -30px;
+    left: 60px;
+    background-repeat: no-repeat;
+    display: inline-block;
+    text-indent: -999999999999999999;
+    width: 200px;
+    height: 80px;
+} 
+
+header .mobile{
+    display: none;
+}
+
+.features{
+    background-color: white;
+    flex-direction: row;
+    display: flex;
+    margin-right: 40px;
+    flex-wrap: wrap;
+    
+}
+
+.features figure {
+    width: 200px;
+    text-align: center;
+    margin: auto;
+    text-transform: uppercase;
+
+}
+
+.features figure img{
+    border: 1px solid white;
+    border-radius: 50%;
+    width: 200px;
+    box-shadow: gray 0 0 10px;
+}
+
+ul{
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+}
+
+@media screen and (max-width: 715px) {
+    header{height: 200px;}
+    header .mobile{
+        display: inline-block;
+    }
+    header .windows {
+        display: none;
+    }
+}
+
+li{
+    display: inline-block;
+    margin: 20px;
+}
+
+footer{
+    background-color: black;
+    color: aliceblue;
+}
+
+.instagram {
+    background-size: 200px;
+    padding: 550px;
+    border-image-repeat: none;
+    image-rendering: 50px;
+    display: inline-block;
+    height: -60px;
+}
